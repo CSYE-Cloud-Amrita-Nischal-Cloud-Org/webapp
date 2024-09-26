@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -41,6 +42,11 @@ public class AppController {
                 .status(HttpStatus.OK)
                 .header("cache-control", "no-cache")
                 .build();
+    }
+
+    @RequestMapping(value = "/healthz", method = {RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE})
+    public ResponseEntity<Void> methodNotAllowed() {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
 
 }
