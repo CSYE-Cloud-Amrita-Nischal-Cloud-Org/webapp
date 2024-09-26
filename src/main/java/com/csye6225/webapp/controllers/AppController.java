@@ -1,6 +1,10 @@
 package com.csye6225.webapp.controllers;
 
+import com.csye6225.webapp.services.DbConnection;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,17 +13,34 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(path = "/")
+@Slf4j
 public class AppController {
+
+    @Autowired
+    DbConnection _dbConnection;
 
     @GetMapping(path = "/healthz")
     public ResponseEntity<Void> healthCheck(HttpServletRequest request) {
+        log.debug("[Health Check] -> Initiated . . . ");
         if (request.getContentLength() > 0) {
+            log.error("[Health Check] -> Request content length is {}", request.getContentLength());
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .header("cache-control", "no-cache")
                     .build();
         }
-        return ResponseEntity.ok().build();
+        if (BooleanUtils.isNotTrue(_dbConnection.isDbConnected())) {
+            log.error("[Health Check] -> Database is not connected");
+            return ResponseEntity
+                    .status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .header("cache-control", "no-cache")
+                    .build();
+        }
+        log.info("[Health Check] -> Database is connected");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header("cache-control", "no-cache")
+                .build();
     }
 
 }
