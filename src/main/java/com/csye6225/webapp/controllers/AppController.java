@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(path = "/")
 @Slf4j
 public class AppController {
 
@@ -23,8 +22,8 @@ public class AppController {
     @GetMapping(path = "/healthz")
     public ResponseEntity<Void> healthCheck(HttpServletRequest request) {
         log.debug("[Health Check] -> Initiated . . . ");
-        if (request.getContentLength() > 0) {
-            log.error("[Health Check] -> Request content length is {}", request.getContentLength());
+        if (request.getContentLength() > 0 || !request.getParameterMap().isEmpty()) {
+            log.error("[Health Check] -> Request contains invalid payload");
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .header("cache-control", "no-cache")
