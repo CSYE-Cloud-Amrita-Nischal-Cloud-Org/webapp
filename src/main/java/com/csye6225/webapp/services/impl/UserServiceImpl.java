@@ -19,7 +19,7 @@ import java.util.Base64;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private BCryptPasswordEncoder _passwordEncoder = new BCryptPasswordEncoder();
+    private final BCryptPasswordEncoder _passwordEncoder = new BCryptPasswordEncoder();
 
     private final String BASIC_AUTH = "Basic ";
 
@@ -69,11 +69,27 @@ public class UserServiceImpl implements UserService {
         log.info("username/email_address = {}", emailPassPair.getLeft());
         UserEntity user = _userRepository.findByemail(emailPassPair.getLeft());
         log.info("user = {}", user);
+        if(user == null) {
+            log.info("user not found");
+            return null;
+        }
         if (!_passwordEncoder.matches(emailPassPair.getRight(), user.getPassword())) {
             log.info("Password does not match");
             return null;
         }
         return user;
+    }
+
+    @Override
+    public UserEntity updateUser(User user) {
+        UserEntity userEntity = getUserByEmail(user.getEmail());
+        userEntity.setFirstName(user.getFirstName());
+        userEntity.setLastName(user.getLastName());
+        userEntity.setPassword(encryptPassword(user.getPassword()));
+        userEntity.setAccountUpdated(Instant.now().toString());
+        userEntity = _userRepository.save(userEntity);
+        userEntity.setPassword(null);
+        return userEntity;
     }
 
     private Pair<String, String> getEmailPasswordPair(String token) {

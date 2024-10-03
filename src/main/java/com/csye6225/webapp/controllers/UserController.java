@@ -13,8 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import lombok.extern.slf4j.Slf4j;
@@ -28,21 +30,20 @@ public class UserController {
     private UserService _userService;
 
     @PostMapping(path = "", produces = "application/json")
-    @ResponseBody
     public ResponseEntity<String> createUser(@RequestBody User user) throws JsonProcessingException {
 
-       UserEntity existingUser = _userService.getUserByEmail(user.getEmail());
-       if (existingUser != null) {
-           return ResponseEntity
-                   .status(HttpStatus.BAD_REQUEST)
-                   .body(JsonUtils.toJson(new ResponseWrapper(HttpStatus.BAD_REQUEST.value(),
-                           ResponseMessage.USER_ALREADY_EXISTS.getMessage())));
-       }
+        UserEntity existingUser = _userService.getUserByEmail(user.getEmail());
+        if (existingUser != null) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(JsonUtils.toJson(new ResponseWrapper(HttpStatus.BAD_REQUEST.value(),
+                            ResponseMessage.USER_ALREADY_EXISTS.getMessage())));
+        }
         if (!this._userService.isEmailValid(user.getEmail())) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(JsonUtils.toJson(new ResponseWrapper(HttpStatus.BAD_REQUEST.value(),
-                                    ResponseMessage.INVALID_EMAIL.getMessage())));
+                            ResponseMessage.INVALID_EMAIL.getMessage())));
         }
         if (!this._userService.isPasswordValid(user.getPassword())) {
             return ResponseEntity
@@ -71,5 +72,39 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @PutMapping(path = "/self")
+    public ResponseEntity<?> updateUser(@RequestBody User user, HttpServletRequest request) throws JsonProcessingException {
+        String authorization = request.getHeader("Authorization");
+        if (authorization == null || !authorization.startsWith("Basic ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        UserEntity userEntity = _userService.validateUserByToken(authorization);
+        if (userEntity == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (!userEntity.getEmail().equals(user.getEmail())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        if (!this._userService.isPasswordValid(user.getPassword())) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(JsonUtils.toJson(new ResponseWrapper(HttpStatus.BAD_REQUEST.value(),
+                            ResponseMessage.INVALID_PASSWORD.getMessage())));
+        }
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(_userService.updateUser(user));
+    }
+
+    @RequestMapping(value = "/self", method = {RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.HEAD, RequestMethod.OPTIONS})
+    public ResponseEntity<Void> methodNotAllowedSelf() {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+    }
+
+    @RequestMapping(value = "", method = {RequestMethod.GET, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.HEAD, RequestMethod.OPTIONS})
+    public ResponseEntity<Void> methodNotAllowed() {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+    }
 
 }

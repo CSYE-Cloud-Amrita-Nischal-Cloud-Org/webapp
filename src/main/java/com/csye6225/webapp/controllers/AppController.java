@@ -43,7 +43,7 @@ public class AppController {
                 .build();
     }
 
-    @RequestMapping(value = "/healthz", method = {RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE})
+    @RequestMapping(value = "/healthz", method = {RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.HEAD, RequestMethod.OPTIONS})
     public ResponseEntity<Void> methodNotAllowed() {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
     }
