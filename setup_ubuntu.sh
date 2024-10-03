@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Install zip and unzip
-sudo apt install -y zip unzip
-
 # Navigate to tmp folder
 cd /tmp || exit
 
@@ -14,9 +11,6 @@ sudo apt update -y; sudo apt install -y java-21-amazon-corretto-jdk
 
 # Verify Java
 java -version
-
-# Install Gradle
-apt install gradle
 
 # Update ubuntu
 apt update -y
@@ -30,11 +24,15 @@ sudo systemctl restart postgresql.service
 printf "\nEnter postgres user 'csye' password:\n\n"
 sudo -u postgres createuser csye -P --superuser
 
-export JAVA_HOME=$(readlink -f `which javac` | sed "s:/bin/javac::")
-export PATH="${PATH}":"${JAVA_HOME}"/bin
+#export JAVA_HOME=$(readlink -f `which javac` | sed "s:/bin/javac::")
+echo "export JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto" >> ~/.bashrc
+echo "export PATH=$PATH:$JAVA_HOME/bin" >> ~/.bashrc
 
 # Create database
 sudo -u postgres psql -c 'create database app_db;'
 
 # Open port 8080
 ufw allow 8080
+
+# Restart shell
+exec $SHELL -l
