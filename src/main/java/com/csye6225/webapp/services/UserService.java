@@ -16,4 +16,6 @@ public interface UserService {
     String encryptPassword(String password);
 
     UserEntity validateUserByToken(String token);
+
+    UserEntity updateUser(User user);
 }
