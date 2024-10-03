@@ -12,8 +12,10 @@
 
 ## Build Instructions
 
+Clone the repo.
+
 ### Setup DigitalOcean VM
-Execute script in root directory
+Execute the setup script in root directory
 
 `./setup_ubuntu.sh`
 
@@ -21,8 +23,15 @@ Execute script in root directory
 sudo systemctl restart postgresql.service
 
 ### Start the backend server
-Navigate to webapp folder<br>
-`cd webapp`<br><br>
 Run the following command<br>
-`./gradlew bootRun --args='--db.username=<USERNAME> --db.password=<PASSWORD>'`
+`./gradlew bootRun --args='--db.username=<USERNAME> --db.password=<PASSWORD>'`<br>
+
+Or<br>
+
+- Build jar file
+  - `./gradlew clean build`
+- Navigate to libs folder after build
+  - `cd build/libs`
+- Run the following command
+  - `java -jar -Ddb.username=<USERNAME> -Ddb.password=<PASSWORD> -jar webapp-0.0.1-SNAPSHOT.jar`
 
