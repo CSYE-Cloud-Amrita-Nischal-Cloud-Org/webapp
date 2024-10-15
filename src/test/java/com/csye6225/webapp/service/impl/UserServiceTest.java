@@ -93,7 +93,7 @@ public class UserServiceTest {
         User user = User.builder()
                 .firstName("first")
                 .lastName("last")
-                .email("first@last.com")
+                .email("firstlast.com")
                 .password("password")
                 .build();
 
