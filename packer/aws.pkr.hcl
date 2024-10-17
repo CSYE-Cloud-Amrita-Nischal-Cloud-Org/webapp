@@ -98,7 +98,7 @@ build {
   provisioner "shell" {
     environment_vars = [
       "DB_USERNAME=${var.db_username}",
-      "DB_PASSWORD=${var.postgres_password}"
+      "DB_PASSWORD=${var.db_password}"
     ]
     script = "./packer/dbSetup.sh"
   }
