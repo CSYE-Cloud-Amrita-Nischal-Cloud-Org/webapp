@@ -19,6 +19,8 @@ jobs:
         uses: hashicorp/setup-packer@v3
         with:
           packer_version: latest
+        run:
+          packer init ./packer/aws.pkr.hcl
 
       # Step 3: Run packer fmt and check for changes
       - name: Run packer fmt
