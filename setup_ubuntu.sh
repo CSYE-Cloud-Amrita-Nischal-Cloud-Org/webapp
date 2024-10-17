@@ -31,8 +31,5 @@ echo "export PATH=$PATH:$JAVA_HOME/bin" >> ~/.bashrc
 # Create database
 sudo -u postgres psql -c 'create database app_db;'
 
-# Open port 8080
-ufw allow 8080
-
 # Restart shell
 exec $SHELL -l
