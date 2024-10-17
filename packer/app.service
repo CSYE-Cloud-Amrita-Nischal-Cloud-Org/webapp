@@ -1,0 +1,20 @@
+[Unit]
+Description=Java Application as a Service
+ConditionPathExists=/opt/webapp/app.jar
+After=network.target
+
+[Service]
+Type=simple
+User=csye6225
+Group=csye6225
+WorkingDirectory=/opt/webapp
+ExecStartPre=/bin/bash /opt/webapp/dbStart.sh
+ExecStart=/bin/bash /opt/webapp/appStart.sh
+Restart=always
+RestartSec=3
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=csye6225
+
+[Install]
+WantedBy=multi-user.target

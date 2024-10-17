@@ -38,14 +38,29 @@ variable "postgres_username" {
   default = "csye6225"
 }
 
+variable "access_key" {
+  type    = string
+  default = "csye6225"
+}
+
+variable "secret_key" {
+  type    = string
+  default = "csye6225"
+}
+
+
 source "amazon-ebs" "my-ami" {
   region          = "${var.aws_region}"
   ami_name        = "csye6225_f24_app_${formatdate("YYYY_MM_DD_HH_mm_ss", timestamp())}"
   ami_description = "AMI for CSYE 6225"
 
-  ami_regions = [
-    "us-east-1",
-  ]
+  secret_key = "${var.secret_key}"
+
+  access_key = "${var.access_key}"
+
+  ami_regions = [ 
+    "${var.aws_region}" 
+    ]
 
   aws_polling {
     delay_seconds = 120
@@ -95,12 +110,24 @@ build {
     destination = "/tmp/app.jar"
   }
 
+  provisioner "file" {
+    source = "appStart.sh"
+    destination = "/tmp/appStart.sh"
+  }
+
+  provisioner "file" {
+    source = "app.service"
+    destination = "/tmp/app.service"
+  }
+
+  provisioner "file" {
+    source = "dbStart.sh"
+    destination = "/tmp/dbStart.sh"
+  }
+
   provisioner "shell" {
     script = "appSetup.sh"
   }
 
-  provisioner "shell" {
-    script = "appStart.sh"
-  }
 }
 
