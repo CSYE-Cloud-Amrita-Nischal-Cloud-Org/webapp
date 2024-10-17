@@ -28,17 +28,14 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run tests
-        run: ./gradlew test
-
-      - name: Build jar file
-        run: ./gradlew clean build
-
-      - name: Set Environment variables
         env: 
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: ./gradlew test
 
+      - name: Build jar file
+        run: ./gradlew clean build
 
       - name: Install Packer on Ubuntu
         run: |

@@ -58,9 +58,9 @@ source "amazon-ebs" "my-ami" {
 
   access_key = "${var.access_key}"
 
-  ami_regions = [ 
-    "${var.aws_region}" 
-    ]
+  ami_regions = [
+    "${var.aws_region}"
+  ]
 
   aws_polling {
     delay_seconds = 120
@@ -111,17 +111,17 @@ build {
   }
 
   provisioner "file" {
-    source = "appStart.sh"
+    source      = "appStart.sh"
     destination = "/tmp/appStart.sh"
   }
 
   provisioner "file" {
-    source = "app.service"
+    source      = "app.service"
     destination = "/tmp/app.service"
   }
 
   provisioner "file" {
-    source = "dbStart.sh"
+    source      = "dbStart.sh"
     destination = "/tmp/dbStart.sh"
   }
 
