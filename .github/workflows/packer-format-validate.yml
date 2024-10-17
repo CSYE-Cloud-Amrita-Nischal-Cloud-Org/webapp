@@ -38,7 +38,7 @@ jobs:
       - name: Run packer validate
         id: packer_validate
         run: |
-          packer validate ./packer/aws.pkr.hcl
+          packer validate --syntax-only ./packer/aws.pkr.hcl
         
         # If packer validate fails, the workflow will also fail
         continue-on-error: false

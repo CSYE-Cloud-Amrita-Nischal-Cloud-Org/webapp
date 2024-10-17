@@ -28,10 +28,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run tests
-        env: 
-          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
         run: ./gradlew test
 
       - name: Build jar file
@@ -46,9 +42,9 @@ jobs:
       - name: Configure AWS Credentials Action for GitHub Actions
         uses: aws-actions/configure-aws-credentials@v4.0.2
         with:
-          aws-access-key-id: $AWS_ACCESS_KEY
-          aws-secret-access-key: $AWS_SECRET_ACCESS_KEY
-          aws-region: $AWS_REGION
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Initialize Packer
         run: |
@@ -57,9 +53,9 @@ jobs:
       - name: Build Custom Image
         run: |
           packer build \
-            -var "aws_region=$AWS_REGION" \
-            -var "access_key=$AWS_ACCESS_KEY" \
-            -var "secret_key=$AWS_SECRET_ACCESS_KEY" ./packer/aws.pkr.hcl 
+            -var "access_key=${{ secrets.AWS_ACCESS_KEY }}" \
+            -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+            -var "aws_region=${{ secrets.AWS_REGION }}" ./packer/aws.pkr.hcl 
 
 
             
