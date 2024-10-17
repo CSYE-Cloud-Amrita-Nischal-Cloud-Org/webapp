@@ -4,13 +4,13 @@ on:
   pull_request:
     branches:
       - main
-    # types:
-    #   - closed
+    types:
+      - closed
 
 jobs:
   build_and_test:
     name: Build and upload jar file then create custom AMI
-    # if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-24.04
 
     steps:
@@ -56,6 +56,3 @@ jobs:
             -var "access_key=${{ secrets.AWS_ACCESS_KEY }}" \
             -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
             -var "aws_region=${{ secrets.AWS_REGION }}" ./packer/aws.pkr.hcl 
-
-
-            
