@@ -86,47 +86,48 @@ build {
   ]
 
   provisioner "shell-local" {
-    inline = ["cd .. && ./gradlew clean build"]
+    inline = ["./gradlew clean build"]
   }
 
   provisioner "shell" {
-    script = "updateOS.sh"
+    script = "./packer/updateOS.sh"
   }
 
   provisioner "shell" {
-    script = "appDirSetup.sh"
+    script = "./packer/appDirSetup.sh"
   }
 
   provisioner "shell" {
-    script = "javaSetup.sh"
+    script = "./packer/javaSetup.sh"
   }
 
   provisioner "shell" {
-    script = "dbSetup.sh"
+
+    script = "./packer/dbSetup.sh"
   }
 
   provisioner "file" {
-    source      = "../build/libs/webapp-0.0.1-SNAPSHOT.jar"
+    source      = "./build/libs/webapp-0.0.1-SNAPSHOT.jar"
     destination = "/tmp/app.jar"
   }
 
   provisioner "file" {
-    source      = "appStart.sh"
+    source      = "./packer/appStart.sh"
     destination = "/tmp/appStart.sh"
   }
 
   provisioner "file" {
-    source      = "app.service"
+    source      = "./packer/app.service"
     destination = "/tmp/app.service"
   }
 
   provisioner "file" {
-    source      = "dbStart.sh"
+    source      = "./packer/dbStart.sh"
     destination = "/tmp/dbStart.sh"
   }
 
   provisioner "shell" {
-    script = "appSetup.sh"
+    script = "./packer/appSetup.sh"
   }
 
 }
