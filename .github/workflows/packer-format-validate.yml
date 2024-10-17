@@ -19,6 +19,8 @@ jobs:
         uses: hashicorp/setup-packer@v3
         with:
           packer_version: latest
+
+      - name: Run packet init
         run:
           packer init ./packer/aws.pkr.hcl
 
