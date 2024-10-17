@@ -1,6 +1,5 @@
 name: Packer Template Check
 
-# This workflow runs on pull request events
 on:
   pull_request:
     branches:
@@ -14,7 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Install Packer
       - name: Install Packer
         uses: hashicorp/setup-packer@v3
         with:
@@ -24,21 +22,17 @@ jobs:
         run:
           packer init ./packer/aws.pkr.hcl
 
-      # Step 3: Run packer fmt and check for changes
       - name: Run packer fmt
         id: packer_fmt
         run: |
           packer fmt -diff ./packer/aws.pkr.hcl
           git diff --exit-code
 
-        # If packer fmt modified any files, the workflow will fail
         continue-on-error: false
       
-      # Step 4: Run packer validate
       - name: Run packer validate
         id: packer_validate
         run: |
           packer validate --syntax-only ./packer/aws.pkr.hcl
         
-        # If packer validate fails, the workflow will also fail
         continue-on-error: false
