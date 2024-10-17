@@ -28,24 +28,20 @@ variable "subnet_id" {
   default = "subnet-0cb34451b17710366"
 }
 
-variable "postgres_password" {
-  type    = string
-  default = "qwertyuiop"
+variable "db_password" {
+  type = string
 }
 
-variable "postgres_username" {
-  type    = string
-  default = "csye6225"
+variable "db_username" {
+  type = string
 }
 
 variable "access_key" {
-  type    = string
-  default = "csye6225"
+  type = string
 }
 
 variable "secret_key" {
-  type    = string
-  default = "csye6225"
+  type = string
 }
 
 
@@ -87,10 +83,6 @@ build {
     "source.amazon-ebs.my-ami"
   ]
 
-  provisioner "shell-local" {
-    inline = ["./gradlew clean build"]
-  }
-
   provisioner "shell" {
     script = "./packer/updateOS.sh"
   }
@@ -104,7 +96,10 @@ build {
   }
 
   provisioner "shell" {
-
+    environment_vars = [
+      "DB_USERNAME=${var.db_username}",
+      "DB_PASSWORD=${var.postgres_password}"
+    ]
     script = "./packer/dbSetup.sh"
   }
 
@@ -123,14 +118,11 @@ build {
     destination = "/tmp/app.service"
   }
 
-  provisioner "file" {
-    source      = "./packer/dbStart.sh"
-    destination = "/tmp/dbStart.sh"
-  }
-
   provisioner "shell" {
+    environment_vars = [
+      "DB_USERNAME=${var.db_username}",
+      "DB_PASSWORD=${var.db_password}"
+    ]
     script = "./packer/appSetup.sh"
   }
-
 }
-

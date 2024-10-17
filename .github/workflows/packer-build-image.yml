@@ -1,4 +1,4 @@
-name: Build Packer custom image
+name: Build Custom Image With Packer
 
 on:
   pull_request:
@@ -53,6 +53,8 @@ jobs:
       - name: Build Custom Image
         run: |
           packer build \
+            -var "db_username=${{ secrets.DB_USERNAME }}" \
+            -var "db_password=${{ secrets.DB_PASSWORD }}" \
             -var "access_key=${{ secrets.AWS_ACCESS_KEY }}" \
             -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
             -var "aws_region=${{ secrets.AWS_REGION }}" ./packer/aws.pkr.hcl 
