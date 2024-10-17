@@ -38,13 +38,30 @@ variable "postgres_username" {
   default = "csye6225"
 }
 
+variable "access_key" {
+  type    = string
+  default = "csye6225"
+}
+
+variable "secret_key" {
+  type    = string
+  default = "csye6225"
+}
+
+
 source "amazon-ebs" "my-ami" {
   region          = "${var.aws_region}"
   ami_name        = "csye6225_f24_app_${formatdate("YYYY_MM_DD_HH_mm_ss", timestamp())}"
   ami_description = "AMI for CSYE 6225"
 
+  ami_users = ["390402535586", "183631339821"]
+
+  secret_key = "${var.secret_key}"
+
+  access_key = "${var.access_key}"
+
   ami_regions = [
-    "us-east-1",
+    "${var.aws_region}"
   ]
 
   aws_polling {
@@ -71,36 +88,49 @@ build {
   ]
 
   provisioner "shell-local" {
-    inline = ["cd .. && ./gradlew clean build"]
+    inline = ["./gradlew clean build"]
   }
 
   provisioner "shell" {
-    script = "updateOS.sh"
+    script = "./packer/updateOS.sh"
   }
 
   provisioner "shell" {
-    script = "appDirSetup.sh"
+    script = "./packer/appDirSetup.sh"
   }
 
   provisioner "shell" {
-    script = "javaSetup.sh"
+    script = "./packer/javaSetup.sh"
   }
 
   provisioner "shell" {
-    script = "dbSetup.sh"
+
+    script = "./packer/dbSetup.sh"
   }
 
   provisioner "file" {
-    source      = "../build/libs/webapp-0.0.1-SNAPSHOT.jar"
+    source      = "./build/libs/webapp-0.0.1-SNAPSHOT.jar"
     destination = "/tmp/app.jar"
   }
 
-  provisioner "shell" {
-    script = "appSetup.sh"
+  provisioner "file" {
+    source      = "./packer/appStart.sh"
+    destination = "/tmp/appStart.sh"
+  }
+
+  provisioner "file" {
+    source      = "./packer/app.service"
+    destination = "/tmp/app.service"
+  }
+
+  provisioner "file" {
+    source      = "./packer/dbStart.sh"
+    destination = "/tmp/dbStart.sh"
   }
 
   provisioner "shell" {
-    script = "appStart.sh"
+    script = "./packer/appSetup.sh"
   }
+
 }
 
