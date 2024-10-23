@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping(path = "/v2/user")
+@RequestMapping(path = "/v1/user")
 @Slf4j
 public class UserController {
 

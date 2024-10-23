@@ -28,14 +28,6 @@ variable "subnet_id" {
   default = "subnet-0cb34451b17710366"
 }
 
-variable "db_password" {
-  type = string
-}
-
-variable "db_username" {
-  type = string
-}
-
 variable "access_key" {
   type = string
 }
@@ -95,13 +87,13 @@ build {
     script = "./packer/javaSetup.sh"
   }
 
-  provisioner "shell" {
-    environment_vars = [
-      "DB_USERNAME=${var.db_username}",
-      "DB_PASSWORD=${var.db_password}"
-    ]
-    script = "./packer/dbSetup.sh"
-  }
+  # provisioner "shell" {
+  #   environment_vars = [
+  #     "DB_USERNAME=${var.db_username}",
+  #     "DB_PASSWORD=${var.db_password}"
+  #   ]
+  #   script = "./packer/dbSetup.sh"
+  # }
 
   provisioner "file" {
     source      = "./build/libs/webapp-0.0.1-SNAPSHOT.jar"
@@ -119,10 +111,6 @@ build {
   }
 
   provisioner "shell" {
-    environment_vars = [
-      "DB_USERNAME=${var.db_username}",
-      "DB_PASSWORD=${var.db_password}"
-    ]
     script = "./packer/appSetup.sh"
   }
 }
