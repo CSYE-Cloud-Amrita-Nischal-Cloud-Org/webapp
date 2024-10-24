@@ -9,3 +9,5 @@ sudo mv /tmp/appStart.sh /opt/webapp/appStart.sh
 sudo chmod 755 /opt/webapp/appStart.sh
 
 sudo chown -R csye6225:csye6225 /opt/webapp
+
+sudo systemctl enable app.service
