@@ -46,7 +46,7 @@ source "amazon-ebs" "my-ami" {
   ami_name        = "csye6225_f24_app_${formatdate("YYYY_MM_DD_HH_mm_ss", timestamp())}"
   ami_description = "AMI for CSYE 6225"
 
-  ami_users = "${var.ami_user}"
+  ami_users = ["${var.ami_user}"]
 
   secret_key = "${var.secret_key}"
 
