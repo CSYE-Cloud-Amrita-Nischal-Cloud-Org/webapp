@@ -15,7 +15,7 @@ variable "aws_region" {
 
 variable "source_ami" {
   type    = string
-  default = "ami-0866a3c8686eaeeba" # Ubuntu 24.04 LTS us-east-1
+  default = "ami-0866a3c8686eaeeba" 
 }
 
 variable "ssh_username" {
@@ -36,13 +36,17 @@ variable "secret_key" {
   type = string
 }
 
+variable "ami_user" {
+  type = string
+}
+
 
 source "amazon-ebs" "my-ami" {
   region          = "${var.aws_region}"
   ami_name        = "csye6225_f24_app_${formatdate("YYYY_MM_DD_HH_mm_ss", timestamp())}"
   ami_description = "AMI for CSYE 6225"
 
-  ami_users = ["390402535586", "183631339821"]
+  ami_users = "${var.ami_user}"
 
   secret_key = "${var.secret_key}"
 
