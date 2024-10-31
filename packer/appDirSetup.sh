@@ -2,7 +2,7 @@
 
 set -e
 
-DIR="/opt/webapp"
+DIR="/opt/webapp/logs"
 
 sudo mkdir -p "${DIR}"
 

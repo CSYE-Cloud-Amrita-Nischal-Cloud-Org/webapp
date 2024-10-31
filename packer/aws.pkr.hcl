@@ -117,4 +117,13 @@ build {
   provisioner "shell" {
     script = "./packer/appSetup.sh"
   }
+
+  provisioner "file" {
+    source      = "./packer/cloudwatch-config.json"
+    destination = "/tmp/cloudwatch-config.json"
+  }
+
+  provisioner "shell" {
+    script = "./packer/cloudWatchInstall.sh"
+  }
 }

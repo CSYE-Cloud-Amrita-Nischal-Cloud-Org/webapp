@@ -28,6 +28,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.apache.commons:commons-lang3:3.0'
+    implementation 'com.timgroup:java-statsd-client:3.1.0'
+    implementation 'com.amazonaws:aws-java-sdk:1.12.777'
 
     runtimeOnly 'org.postgresql:postgresql'
     compileOnly 'org.projectlombok:lombok'
