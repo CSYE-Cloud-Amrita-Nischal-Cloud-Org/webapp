@@ -29,7 +29,7 @@ public class AppController {
     public ResponseEntity<Void> healthCheck(HttpServletRequest request) {
         _statsDClient.incrementCounter("endpoint.healthcheck.api.get");
         long currentTime = System.currentTimeMillis();
-        log.debug("[Health Check] -> Initiated . . . ");
+        log.info("[Health Check] -> Initiated . . . ");
         if (request.getContentLength() > 0 || !request.getParameterMap().isEmpty()) {
             log.error("[Health Check] -> Request contains invalid payload");
             _statsDClient.recordExecutionTimeToNow("endpoint.healthcheck.api.get.failure.execution.time", currentTime);
