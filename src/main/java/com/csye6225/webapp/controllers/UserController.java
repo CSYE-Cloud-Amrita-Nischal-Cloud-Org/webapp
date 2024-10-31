@@ -46,8 +46,10 @@ public class UserController {
     public ResponseEntity<String> createUser(@RequestBody User user) {
         _statsDClient.incrementCounter("endpoint.user.api.post");
         long currentTime = System.currentTimeMillis();
+        log.info("[Create User] -> Initiated . . . ");
         UserEntity existingUser = _userService.getUserByEmail(user.getEmail());
         if (existingUser != null) {
+            log.info("[Create User] -> User already exists . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.api.post.failure.execution.time", currentTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
@@ -55,6 +57,7 @@ public class UserController {
                             ResponseMessage.USER_ALREADY_EXISTS.getMessage())));
         }
         if (!this._userService.isEmailValid(user.getEmail())) {
+            log.info("[Create User] -> Email is invalid. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.api.post.failure.execution.time", currentTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
@@ -62,6 +65,7 @@ public class UserController {
                             ResponseMessage.INVALID_EMAIL.getMessage())));
         }
         if (!this._userService.isPasswordValid(user.getPassword())) {
+            log.info("[Create User] -> Password is invalid. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.api.post.failure.execution.time", currentTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
@@ -76,45 +80,54 @@ public class UserController {
 
     @GetMapping(path = "/self")
     public ResponseEntity<UserEntity> getUser(HttpServletRequest request) {
+        log.info("[Get User] -> Initiated . . . ");
         _statsDClient.incrementCounter("endpoint.user.self.api.get");
         long currentTime = System.currentTimeMillis();
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.startsWith("Basic ")) {
+            log.info("[Get User] -> Authorization is invalid. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.api.get.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         UserEntity user = _userService.validateUserByToken(authorization);
         if (user == null) {
+            log.info("[Get User] -> User does not exist. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.api.get.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+        log.info("[Get User] -> User found. . . . ");
         _statsDClient.recordExecutionTimeToNow("endpoint.user.api.get.success.execution.time", currentTime);
         return ResponseEntity.ok(user);
     }
 
     @PutMapping(path = "/self")
     public ResponseEntity<?> updateUser(@RequestBody User user, HttpServletRequest request) {
+        log.info("[Update User] -> Initiated . . . ");
         _statsDClient.incrementCounter("endpoint.user.self.api.put");
         long currentTime = System.currentTimeMillis();
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.startsWith("Basic ")) {
+            log.info("[Update User] -> Authorization is invalid. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.api.put.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         UserEntity userEntity = _userService.validateUserByToken(authorization);
         if (userEntity == null) {
+            log.info("[Update User] -> User does not exist. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.api.put.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         if (!userEntity.getEmail().equals(user.getEmail())) {
+            log.info("[Update User] -> Email is invalid. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.api.put.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
         if (!this._userService.isPasswordValid(user.getPassword())) {
+            log.info("[Update User] -> Password is invalid. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.api.put.failure.execution.time", currentTime);
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
@@ -122,6 +135,7 @@ public class UserController {
                             ResponseMessage.INVALID_PASSWORD.getMessage())));
         }
 
+        log.info("[Update User] -> User information updated. . . . ");
         _statsDClient.recordExecutionTimeToNow("endpoint.user.api.put.success.execution.time", currentTime);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(_userService.updateUser(user));
     }
@@ -129,41 +143,57 @@ public class UserController {
     @PostMapping(path = "/self/pic", produces = "application/json")
     public ResponseEntity<ImageEntity> addProfilePic(@RequestParam(value="profilePic") MultipartFile image,
                                                      HttpServletRequest request) {
+        log.info("[Add Profile Pic] -> Initiated . . . ");
         _statsDClient.incrementCounter("endpoint.user.self.pic.api.post");
         long currentTime = System.currentTimeMillis();
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.startsWith("Basic ")) {
+            log.info("[Add Profile Pic] -> Authorization is invalid. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.post.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         UserEntity userEntity = _userService.validateUserByToken(authorization);
         if (userEntity == null) {
+            log.info("[Add Profile Pic] -> User does not exist. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.post.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         if (!_imageService.isImageValid(image)) {
+            log.info("[Add Profile Pic] -> Image is invalid. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.post.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
-        _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.post.success.execution.time", currentTime);
-        return ResponseEntity.status(HttpStatus.CREATED).body(_imageService.addImage(image, userEntity.getId()));
+        Optional<ImageEntity> imageEntityOptional = _imageService.getImage(userEntity.getId());
+
+        if (imageEntityOptional.isEmpty()) {
+            log.info("[Add Profile Pic] -> Image currently does not have an image. . . . ");
+            _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.post.success.execution.time", currentTime);
+            log.info("[Add Profile Pic] -> Image successfully added. . . . ");
+            return ResponseEntity.status(HttpStatus.CREATED).body(_imageService.addImage(image, userEntity.getId()));
+        }
+
+        log.info("[Add Profile Pic] -> User already has an image. . . . ");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
     @GetMapping(path = "/self/pic", produces = "application/json")
     public ResponseEntity<ImageEntity> getProfilePic(HttpServletRequest request) {
+        log.info("[Get Profile Pic] -> Initiated . . . ");
         _statsDClient.incrementCounter("endpoint.user.self.pic.api.get");
         long currentTime = System.currentTimeMillis();
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.startsWith("Basic ")) {
+            log.info("[Get Profile Pic] -> Authorization is invalid. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.get.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         UserEntity userEntity = _userService.validateUserByToken(authorization);
         if (userEntity == null) {
+            log.info("[Get Profile Pic] -> User does not exist. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.get.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -171,26 +201,31 @@ public class UserController {
         Optional<ImageEntity> imageEntityOptional = _imageService.getImage(userEntity.getId());
 
         if (imageEntityOptional.isEmpty()) {
+            log.info("[Get Profile Pic] -> User does not have an image. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.get.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
+        log.info("[Get Profile Pic] -> Fetching the profile pic. . . . ");
         _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.get.success.execution.time", currentTime);
         return ResponseEntity.status(HttpStatus.OK).body(imageEntityOptional.get());
     }
 
     @DeleteMapping(path = "/self/pic")
     public ResponseEntity<Void> addProfilePic(HttpServletRequest request) {
+        log.info("[Delete Profile Pic] -> Initiated . . . ");
         _statsDClient.incrementCounter("endpoint.user.self.pic.api.delete");
         long currentTime = System.currentTimeMillis();
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.startsWith("Basic ")) {
+            log.info("[Delete Profile Pic] -> Authorization is invalid. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.delete.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         UserEntity userEntity = _userService.validateUserByToken(authorization);
         if (userEntity == null) {
+            log.info("[Delete Profile Pic] -> User does not exist. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.delete.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -198,10 +233,12 @@ public class UserController {
         Optional<ImageEntity> imageEntityOptional = _imageService.getImage(userEntity.getId());
 
         if (imageEntityOptional.isEmpty()) {
+            log.info("[Delete Profile Pic] -> User does not have an image. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.delete.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         _imageService.deleteFile(imageEntityOptional.get());
+        log.info("[Delete Profile Pic] -> Profile pic deleted. . . . ");
         _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.delete.success.execution.time", currentTime);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
