@@ -212,7 +212,7 @@ public class UserController {
     }
 
     @DeleteMapping(path = "/self/pic")
-    public ResponseEntity<Void> addProfilePic(HttpServletRequest request) {
+    public ResponseEntity<Void> deleteProfilePic(HttpServletRequest request) {
         log.info("[Delete Profile Pic] -> Initiated . . . ");
         _statsDClient.incrementCounter("endpoint.user.self.pic.api.delete");
         long currentTime = System.currentTimeMillis();
