@@ -8,6 +8,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.csye6225.webapp.entity.ImageEntity;
 import com.csye6225.webapp.repository.ImageRepository;
 import com.csye6225.webapp.services.ImageService;
+import com.timgroup.statsd.StatsDClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +32,9 @@ public class ImageServiceImpl implements ImageService {
     @Autowired
     private AmazonS3 amazonS3Client;
 
+    @Autowired
+    private StatsDClient statsDClient;
+
     @Value("${aws.s3.bucket.name}")
     String bucketName;
 
@@ -48,14 +52,19 @@ public class ImageServiceImpl implements ImageService {
                 .uploadDate(now.toString())
                 .userId(uuid)
                 .build();
+        long currentTime = System.currentTimeMillis();
         imageEntity = _imageRepository.save(imageEntity);
+        statsDClient.recordExecutionTimeToNow("rds.save.file.execution time", currentTime);
 
         return imageEntity;
     }
 
     @Override
     public Optional<ImageEntity> getImage(UUID uuid) {
-        return _imageRepository.findByUserId(uuid);
+        long currentTime = System.currentTimeMillis();
+        Optional<ImageEntity> imageEntity = _imageRepository.findByUserId(uuid);
+        statsDClient.recordExecutionTimeToNow("rds.retrieve.file.execution time", currentTime);
+        return imageEntity;
     }
 
     @Override
@@ -81,7 +90,9 @@ public class ImageServiceImpl implements ImageService {
             fileName = StringUtils.isEmpty(fileName) ? "untitled" : fileName;
             String s3FileName = userId + "/" + fileName.replace(" ", "-");
             InputStream inputStream = image.getInputStream();
+            long currentTime = System.currentTimeMillis();
             amazonS3Client.putObject(bucketName, s3FileName, inputStream, metadata);
+            statsDClient.recordExecutionTimeToNow("aws.s3.upload.file.execution time", currentTime);
             inputStream.close();
             return bucketName + "/" + s3FileName;
         } catch (AmazonServiceException serviceException) {
@@ -98,9 +109,13 @@ public class ImageServiceImpl implements ImageService {
         String fileUrl = imageEntity.getUrl();
         String fileName = fileUrl.substring(fileUrl.indexOf("/") + 1);
         log.info("File to be deleted: {}/{}", bucketName, fileName);
+        long currentTime = System.currentTimeMillis();
         amazonS3Client.deleteObject(new DeleteObjectRequest(bucketName, fileName));
-        _imageRepository.delete(imageEntity);
-    }
+        statsDClient.recordExecutionTimeToNow("aws.s3.delete.file.execution time", currentTime);
 
+        currentTime = System.currentTimeMillis();
+        _imageRepository.delete(imageEntity);
+        statsDClient.recordExecutionTimeToNow("rds.delete.image.execution time", currentTime);
+    }
 
 }

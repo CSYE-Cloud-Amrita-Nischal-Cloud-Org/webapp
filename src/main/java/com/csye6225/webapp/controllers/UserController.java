@@ -45,7 +45,7 @@ public class UserController {
     @PostMapping(path = "", produces = "application/json")
     public ResponseEntity<String> createUser(@RequestBody User user) {
         _statsDClient.incrementCounter("endpoint.user.api.post");
-        long currentTime = Instant.now().toEpochMilli();
+        long currentTime = System.currentTimeMillis();
         UserEntity existingUser = _userService.getUserByEmail(user.getEmail());
         if (existingUser != null) {
             _statsDClient.recordExecutionTimeToNow("endpoint.user.api.post.failure.execution.time", currentTime);
@@ -77,7 +77,7 @@ public class UserController {
     @GetMapping(path = "/self")
     public ResponseEntity<UserEntity> getUser(HttpServletRequest request) {
         _statsDClient.incrementCounter("endpoint.user.self.api.get");
-        long currentTime = Instant.now().toEpochMilli();
+        long currentTime = System.currentTimeMillis();
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.startsWith("Basic ")) {
             _statsDClient.recordExecutionTimeToNow("endpoint.user.api.get.failure.execution.time", currentTime);
@@ -97,7 +97,7 @@ public class UserController {
     @PutMapping(path = "/self")
     public ResponseEntity<?> updateUser(@RequestBody User user, HttpServletRequest request) {
         _statsDClient.incrementCounter("endpoint.user.self.api.put");
-        long currentTime = Instant.now().toEpochMilli();
+        long currentTime = System.currentTimeMillis();
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.startsWith("Basic ")) {
             _statsDClient.recordExecutionTimeToNow("endpoint.user.api.put.failure.execution.time", currentTime);
@@ -130,7 +130,7 @@ public class UserController {
     public ResponseEntity<ImageEntity> addProfilePic(@RequestParam(value="profilePic") MultipartFile image,
                                                      HttpServletRequest request) {
         _statsDClient.incrementCounter("endpoint.user.self.pic.api.post");
-        long currentTime = Instant.now().toEpochMilli();
+        long currentTime = System.currentTimeMillis();
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.startsWith("Basic ")) {
             _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.post.failure.execution.time", currentTime);
@@ -155,7 +155,7 @@ public class UserController {
     @GetMapping(path = "/self/pic", produces = "application/json")
     public ResponseEntity<ImageEntity> getProfilePic(HttpServletRequest request) {
         _statsDClient.incrementCounter("endpoint.user.self.pic.api.get");
-        long currentTime = Instant.now().toEpochMilli();
+        long currentTime = System.currentTimeMillis();
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.startsWith("Basic ")) {
             _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.get.failure.execution.time", currentTime);
@@ -182,7 +182,7 @@ public class UserController {
     @DeleteMapping(path = "/self/pic")
     public ResponseEntity<Void> addProfilePic(HttpServletRequest request) {
         _statsDClient.incrementCounter("endpoint.user.self.pic.api.delete");
-        long currentTime = Instant.now().toEpochMilli();
+        long currentTime = System.currentTimeMillis();
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.startsWith("Basic ")) {
             _statsDClient.recordExecutionTimeToNow("endpoint.user.self.pic.api.delete.failure.execution.time", currentTime);
