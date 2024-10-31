@@ -12,8 +12,8 @@ WorkingDirectory=/opt/webapp
 ExecStart=/bin/bash /opt/webapp/appStart.sh
 Restart=always
 RestartSec=3
-StandardOutput=syslog
-StandardError=syslog
+StandardOutput=file:/opt/webapp/logs/webapp.log
+StandardError=file:/opt/webapp/logs/webapp.log
 SyslogIdentifier=csye6225
 
 [Install]
