@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity getUserByEmail(String email) {
-        long currentTime = Instant.now().toEpochMilli();
+        long currentTime = System.currentTimeMillis();
         UserEntity userEntity = _userRepository.findByemail(email);
         _statsDClient.recordExecutionTimeToNow("find.user.by.email.execution.time", currentTime);
         return userEntity;
@@ -110,7 +110,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserEntity saveUser(UserEntity user) {
-        long currentTime = Instant.now().toEpochMilli();
+        long currentTime = System.currentTimeMillis();
         UserEntity userEntity = _userRepository.save(user);
         _statsDClient.recordExecutionTimeToNow("save.user.execution.time", currentTime);
         return userEntity;
