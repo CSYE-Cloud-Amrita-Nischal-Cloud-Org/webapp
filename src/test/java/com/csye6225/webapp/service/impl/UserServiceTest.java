@@ -4,6 +4,7 @@ import com.csye6225.webapp.entity.UserEntity;
 import com.csye6225.webapp.models.User;
 import com.csye6225.webapp.repository.UserRepository;
 import com.csye6225.webapp.services.impl.UserServiceImpl;
+import com.timgroup.statsd.StatsDClient;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -17,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 public class UserServiceTest {
@@ -28,6 +31,9 @@ public class UserServiceTest {
 
     @Mock
     private UserRepository _userRepository;
+
+    @Mock
+    private StatsDClient _statsDClient;
 
     @BeforeClass
     public void setUp() {
@@ -71,6 +77,7 @@ public class UserServiceTest {
     public void getUserByEmail_Success() {
         String email = "test@test.com";
 
+        doNothing().when(_statsDClient).recordExecutionTimeToNow(any(), anyLong());
         when(_userRepository.findByemail(email)).thenReturn(getUserEntity(email));
 
         UserEntity expectedUser = _userService.getUserByEmail(email);
@@ -82,7 +89,7 @@ public class UserServiceTest {
     public void getUserByEmail_Failure() {
         String email = "test@test.com";
         UserEntity expectedUser = _userService.getUserByEmail(email);
-
+        doNothing().when(_statsDClient).recordExecutionTimeToNow(any(), anyLong());
         when(_userRepository.findByemail(email)).thenReturn(null);
         assertNull(expectedUser, "User should be null");
     }
@@ -99,7 +106,7 @@ public class UserServiceTest {
 
         // Expected UserEntity
         UserEntity actualUserEntity = getUserEntity("first@last.com");
-
+        doNothing().when(_statsDClient).recordExecutionTimeToNow(any(), anyLong());
         when(_userRepository.save(any(UserEntity.class))).thenReturn(actualUserEntity);
 
         UserEntity expectedUser = _userService.createUser(user);

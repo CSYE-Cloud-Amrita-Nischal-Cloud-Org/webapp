@@ -4,6 +4,7 @@ import com.csye6225.webapp.entity.UserEntity;
 import com.csye6225.webapp.models.User;
 import com.csye6225.webapp.repository.UserRepository;
 import com.csye6225.webapp.services.UserService;
+import com.timgroup.statsd.StatsDClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,6 +27,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository _userRepository;
 
+    @Autowired
+    StatsDClient _statsDClient;
+
     @Override
     public boolean isEmailValid(String emailAddress) {
         String emailPattern = "[a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
@@ -39,7 +43,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity getUserByEmail(String email) {
-        return _userRepository.findByemail(email);
+        long currentTime = Instant.now().toEpochMilli();
+        UserEntity userEntity = _userRepository.findByemail(email);
+        _statsDClient.recordExecutionTimeToNow("find.user.by.email.execution.time", currentTime);
+        return userEntity;
     }
 
     @Override
@@ -53,7 +60,7 @@ public class UserServiceImpl implements UserService {
                 .accountCreated(now.toString())
                 .accountUpdated(now.toString())
                 .build();
-        userEntity = _userRepository.save(userEntity);
+        userEntity = saveUser(userEntity);
         userEntity.setPassword(null);
         return userEntity;
     }
@@ -67,7 +74,7 @@ public class UserServiceImpl implements UserService {
     public UserEntity validateUserByToken(String token) {
         Pair<String, String> emailPassPair = getEmailPasswordPair(token);
         log.info("username/email_address = {}", emailPassPair.getLeft());
-        UserEntity user = _userRepository.findByemail(emailPassPair.getLeft());
+        UserEntity user = getUserByEmail(emailPassPair.getLeft());
         log.info("user = {}", user);
         if(user == null) {
             log.info("user not found");
@@ -87,7 +94,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setLastName(user.getLastName());
         userEntity.setPassword(encryptPassword(user.getPassword()));
         userEntity.setAccountUpdated(Instant.now().toString());
-        userEntity = _userRepository.save(userEntity);
+        userEntity = saveUser(userEntity);
         userEntity.setPassword(null);
         return userEntity;
     }
@@ -100,6 +107,13 @@ public class UserServiceImpl implements UserService {
         String email = credentials.substring(0, delimiterIndex);
         String password = credentials.substring(delimiterIndex + 1);
         return new ImmutablePair<>(email, password);
+    }
+
+    private UserEntity saveUser(UserEntity user) {
+        long currentTime = Instant.now().toEpochMilli();
+        UserEntity userEntity = _userRepository.save(user);
+        _statsDClient.recordExecutionTimeToNow("save.user.execution.time", currentTime);
+        return userEntity;
     }
 
 }
