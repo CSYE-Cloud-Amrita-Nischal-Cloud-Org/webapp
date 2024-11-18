@@ -63,7 +63,7 @@ public class UserEntity {
     String accountUpdated;
 
     @Column(name = "is_verified")
-    @JsonProperty("is_verified")
+    @JsonIgnore
     Boolean isVerified;
 
 }
