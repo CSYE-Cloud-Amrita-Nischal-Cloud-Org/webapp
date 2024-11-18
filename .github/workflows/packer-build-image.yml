@@ -83,7 +83,7 @@ jobs:
         id: retrieve_launch_template_id
         run: |
           echo "Retrieving Launch Template ID..."
-          LAUNCH_TEMPLATE_NAME=${{ secrets.LAUNCH_TEMPLATE_NAME }} #csye6225_asg
+          LAUNCH_TEMPLATE_NAME=${{ secrets.LAUNCH_TEMPLATE_NAME }}
           LAUNCH_TEMPLATE_ID=$(aws ec2 describe-launch-templates \
             --filters "Name=launch-template-name,Values=$LAUNCH_TEMPLATE_NAME" \
             --query 'LaunchTemplates[0].LaunchTemplateId' \
@@ -110,7 +110,7 @@ jobs:
         id: set_asg_name
         run: |
           echo "Set auto-scaling group name in github env..."
-          ASG_NAME=${{ secrets.ASG_NAME }} #AutoScaledJavaAppInstance
+          ASG_NAME=${{ secrets.ASG_NAME }}
           [ -z "$ASG_NAME" ] && echo "Error: Auto Scaling Group name is not set." && exit 1
           echo "ASG_NAME=$ASG_NAME" >> $GITHUB_ENV
 
