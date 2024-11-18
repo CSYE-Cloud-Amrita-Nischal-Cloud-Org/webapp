@@ -1,7 +1,6 @@
 package com.csye6225.webapp.services.impl;
 
 import com.amazonaws.services.sns.AmazonSNSAsync;
-import com.amazonaws.services.sns.AmazonSNSAsyncClientBuilder;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
 import com.amazonaws.services.sns.model.Topic;
@@ -14,9 +13,9 @@ import com.csye6225.webapp.services.EmailAuthTokenService;
 import com.csye6225.webapp.services.UserService;
 import com.csye6225.webapp.utils.JsonUtils;
 import com.timgroup.statsd.StatsDClient;
-import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +40,6 @@ public class UserServiceImpl implements UserService {
 
     private final String BASIC_AUTH = "Basic ";
 
-    private AmazonSNSAsync _amazonSNSClient;
-
     @Value("${aws.sns.topic.name}")
     String snsTopicName;
 
@@ -58,10 +55,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private EmailVerificationsRepository _emailVerificationsRepository;
 
-    @PostConstruct
-    public void initializeSNSClient() {
-        _amazonSNSClient = AmazonSNSAsyncClientBuilder.defaultClient();
-    }
+    @Autowired
+    private AmazonSNSAsync _amazonSNSClient;
 
     @Override
     public boolean isEmailValid(String emailAddress) {
@@ -95,7 +90,6 @@ public class UserServiceImpl implements UserService {
                 .isVerified(false)
                 .build();
         userEntity = saveUser(userEntity);
-        userEntity.setPassword(null);
         generateTokenAndSendMessage(user.getEmail());
         return userEntity;
     }
@@ -119,6 +113,11 @@ public class UserServiceImpl implements UserService {
             log.info("Password does not match");
             return null;
         }
+        if (BooleanUtils.isNotTrue(user.getIsVerified()))
+        {
+            log.info("User is not verified");
+            return null;
+        }
         return user;
     }
 
@@ -130,25 +129,34 @@ public class UserServiceImpl implements UserService {
         userEntity.setPassword(encryptPassword(user.getPassword()));
         userEntity.setAccountUpdated(Instant.now().toString());
         userEntity = saveUser(userEntity);
-        userEntity.setPassword(null);
         return userEntity;
     }
 
     @Override
     public Boolean validateVerificationToken(String token) {
+        log.info("[validateVerificationToken] Search for token {}", token);
         Optional<EmailVerificationEntity> emailVerificationEntity = _emailVerificationsRepository.findByToken(token);
         if (emailVerificationEntity.isPresent()) {
+            log.info("Verification token found");
             EmailVerificationEntity verificationEntity = emailVerificationEntity.get();
             Instant expirationTime = Instant.parse(verificationEntity.getExpirationTime());
             if (Instant.now().isBefore(expirationTime)) {
+                log.info("[Validate Verification Token] Token is valid.");
                 String email = _emailAuthTokenService.getEmailFromToken(token);
                 UserEntity userEntity = getUserByEmail(email);
+                if (userEntity.getIsVerified())
+                {
+                    log.info("Token is verified!!");
+                    return null;
+                }
                 userEntity.setIsVerified(true);
-                _userRepository.save(userEntity);
+                saveUser(userEntity);
                 return true;
             }
+            log.error("[Validate Verification Token] Token expired!!");
             return false;
         }
+        log.error("[validateVerificationToken] Token not found!!");
         return null;
     }
 
@@ -174,6 +182,7 @@ public class UserServiceImpl implements UserService {
         Instant now = Instant.now();
         String expirationTime = now.plusSeconds(120).toString();
         String token = _emailAuthTokenService.getEmailAuthToken(email, expirationTime);
+        log.info("[Create User] Token = {}", token);
         EmailVerificationEntity emailVerificationEntity = EmailVerificationEntity.builder()
                         .email(email)
                         .token(token)
@@ -205,7 +214,9 @@ public class UserServiceImpl implements UserService {
 
         try {
             Topic topic = _amazonSNSClient.listTopicsAsync().get().getTopics().stream()
-                    .filter(t -> t.getTopicArn().contains(topicName)).findAny().orElse(null);
+                    .filter(t -> t.getTopicArn().endsWith(":" + topicName))
+                    .findAny()
+                    .orElse(null);
 
             if (null != topic) {
                 topicArn = topic.getTopicArn();
