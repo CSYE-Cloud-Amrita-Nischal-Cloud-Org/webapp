@@ -17,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 @JsonPropertyOrder({"id", "first_name", "last_name", "email", "account_created", "account_updated", "is_verified"})
 @Table(name = "users",  uniqueConstraints= @UniqueConstraint(columnNames={"user_id", "email"}))
 public class UserEntity {

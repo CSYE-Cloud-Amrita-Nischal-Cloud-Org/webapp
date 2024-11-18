@@ -136,19 +136,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Boolean validateVerificationToken(String token) {
+        log.info("[validateVerificationToken] Search for token");
         Optional<EmailVerificationEntity> emailVerificationEntity = _emailVerificationsRepository.findByToken(token);
         if (emailVerificationEntity.isPresent()) {
+            log.info("Verification token found");
             EmailVerificationEntity verificationEntity = emailVerificationEntity.get();
             Instant expirationTime = Instant.parse(verificationEntity.getExpirationTime());
             if (Instant.now().isBefore(expirationTime)) {
                 String email = _emailAuthTokenService.getEmailFromToken(token);
+                log.info("Email = {}", email);
                 UserEntity userEntity = getUserByEmail(email);
                 userEntity.setIsVerified(true);
-                _userRepository.save(userEntity);
+                log.info("user = {}", userEntity);
+                saveUser(userEntity);
                 return true;
             }
             return false;
         }
+        log.error("[validateVerificationToken] Token not found");
         return null;
     }
 

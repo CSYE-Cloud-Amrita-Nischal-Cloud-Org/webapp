@@ -92,7 +92,7 @@ public class UserController {
 
         UserEntity user = _userService.validateUserByToken(authorization);
         if (user == null) {
-            log.info("[Get User] -> User does not exist. . . . ");
+            log.info("[Get User] -> User authentication failed. . . . ");
             _statsDClient.recordExecutionTimeToNow("endpoint.user.api.get.failure.execution.time", currentTime);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
