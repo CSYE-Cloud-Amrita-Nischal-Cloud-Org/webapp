@@ -50,13 +50,13 @@ jobs:
         run: |
           packer init ./packer/aws.pkr.hcl
 
-      - name: Build Custom Image
-        run: |
-          packer build \
-            -var "access_key=${{ secrets.AWS_ACCESS_KEY }}" \
-            -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
-            -var "aws_region=${{ secrets.AWS_REGION }}" \
-            -var "ami_user=${{ secrets.AMI_USER }}" ./packer/aws.pkr.hcl 
+#      - name: Build Custom Image
+#        run: |
+#          packer build \
+#            -var "access_key=${{ secrets.AWS_ACCESS_KEY }}" \
+#            -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+#            -var "aws_region=${{ secrets.AWS_REGION }}" \
+#            -var "ami_user=${{ secrets.AMI_USER }}" ./packer/aws.pkr.hcl
 
       - name: Retrieve Latest AMI ID
         id: retrieve_ami_id
@@ -69,6 +69,7 @@ jobs:
             --query "Images | sort_by(@, &CreationDate)[-1].ImageId" \
             --output text)
           [ -z "$AMI_ID" ] && echo "Error: AMI ID not found." && exit 1
+          echo "AMI_ID: $AMI_ID"
           echo "AMI_ID=$AMI_ID" >> $GITHUB_ENV
 
       # ------------------ Switch to Demo Account for Deployment ------------------
@@ -104,6 +105,7 @@ jobs:
             --query 'LaunchTemplateVersion.VersionNumber'\
             --output text)
           [ -z "$LT_VERSION" ] && echo "Error: Failed to create new Launch Template version." && exit 1
+          echo "LT_VERSION: $LT_VERSION"
           echo "LT_VERSION=$LT_VERSION" >> $GITHUB_ENV
 
       - name: Set Auto Scaling Group Name
@@ -112,6 +114,7 @@ jobs:
           echo "Set auto-scaling group name in github env..."
           ASG_NAME=${{ secrets.ASG_NAME }}
           [ -z "$ASG_NAME" ] && echo "Error: Auto Scaling Group name is not set." && exit 1
+          echo "ASG_NAME: $ASG_NAME"
           echo "ASG_NAME=$ASG_NAME" >> $GITHUB_ENV
 
       - name: Update Auto Scaling Group
@@ -138,6 +141,7 @@ jobs:
             --query 'InstanceRefreshId' \
             --output text)
           [ -z "$INSTANCE_REFRESH_ID" ] && echo "Error: Failed to start instance refresh." && exit 1
+          echo "INSTANCE_REFRESH_ID: $INSTANCE_REFRESH_ID"
           echo "INSTANCE_REFRESH_ID=$INSTANCE_REFRESH_ID" >> $GITHUB_ENV
 
       - name: Wait for Instance Refresh to Complete
