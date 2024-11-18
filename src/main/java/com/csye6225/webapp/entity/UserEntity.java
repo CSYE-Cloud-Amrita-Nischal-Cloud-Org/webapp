@@ -26,7 +26,7 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonPropertyOrder({"id", "first_name", "last_name", "email", "account_created", "account_updated"})
+@JsonPropertyOrder({"id", "first_name", "last_name", "email", "account_created", "account_updated", "is_verified"})
 @Table(name = "users",  uniqueConstraints= @UniqueConstraint(columnNames={"user_id", "email"}))
 public class UserEntity {
 
@@ -59,5 +59,9 @@ public class UserEntity {
     @Column(name = "account_updated")
     @JsonProperty("account_updated")
     String accountUpdated;
+
+    @Column(name = "is_verified")
+    @JsonProperty("is_verified")
+    Boolean isVerified;
 
 }
