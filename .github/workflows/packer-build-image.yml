@@ -50,20 +50,20 @@ jobs:
         run: |
           packer init ./packer/aws.pkr.hcl
 
-#      - name: Build Custom Image
-#        run: |
-#          packer build \
-#            -var "access_key=${{ secrets.AWS_ACCESS_KEY }}" \
-#            -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
-#            -var "aws_region=${{ secrets.AWS_REGION }}" \
-#            -var "ami_user=${{ secrets.AMI_USER }}" ./packer/aws.pkr.hcl
+      - name: Build Custom Image
+        run: |
+          packer build \
+            -var "access_key=${{ secrets.AWS_ACCESS_KEY }}" \
+            -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+            -var "aws_region=${{ secrets.AWS_REGION }}" \
+            -var "ami_user=${{ secrets.AMI_USER }}" ./packer/aws.pkr.hcl
 
       - name: Retrieve Latest AMI ID
         id: retrieve_ami_id
         run: |
           echo "Retrieving latest AMI ID..."
           AMI_ID=$(aws ec2 describe-images \
-            --owners self \
+            --executable-users self \
             --filters "Name=name,Values=csye6225_f24_app_*" \
                       "Name=state,Values=available" \
             --query "Images | sort_by(@, &CreationDate)[-1].ImageId" \
