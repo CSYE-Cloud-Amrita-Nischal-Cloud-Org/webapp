@@ -18,4 +18,6 @@ public interface UserService {
     UserEntity validateUserByToken(String token);
 
     UserEntity updateUser(User user);
+
+    Boolean validateVerificationToken(String token);
 }
