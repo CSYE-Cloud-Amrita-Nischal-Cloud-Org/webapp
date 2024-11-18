@@ -136,7 +136,7 @@ jobs:
             --preferences '{
               "MinHealthyPercentage": 90,
               "InstanceWarmup": 300,
-              "Name": $ASG_NAME
+              "Name": "$ASG_NAME"
             }' \
             --query 'InstanceRefreshId' \
             --output text)
