@@ -114,7 +114,6 @@ jobs:
           echo "Set auto-scaling group name in github env..."
           ASG_NAME=${{ secrets.ASG_NAME }}
           [ -z "$ASG_NAME" ] && echo "Error: Auto Scaling Group name is not set." && exit 1
-          echo "ASG_NAME: $ASG_NAME"
           echo "ASG_NAME=$ASG_NAME" >> $GITHUB_ENV
 
       - name: Update Auto Scaling Group
@@ -126,7 +125,7 @@ jobs:
           aws autoscaling update-auto-scaling-group \
             --auto-scaling-group-name "$ASG_NAME" \
             --launch-template "LaunchTemplateId=${{ env.LAUNCH_TEMPLATE_ID }},Version=$LT_VERSION"
-          echo "Auto Scaling Group '$ASG_NAME' updated to use with Launch Template version '$LT_VERSION'."
+          echo "Auto Scaling Group $ASG_NAME updated to use with Launch Template version $LT_VERSION."
 
       - name: Start Instance Refresh
         id: start_instance_refresh
@@ -136,7 +135,8 @@ jobs:
             --auto-scaling-group-name "$ASG_NAME" \
             --preferences '{
               "MinHealthyPercentage": 90,
-              "InstanceWarmup": 300
+              "InstanceWarmup": 300,
+              "Name": $ASG_NAME
             }' \
             --query 'InstanceRefreshId' \
             --output text)
