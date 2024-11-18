@@ -144,6 +144,11 @@ public class UserServiceImpl implements UserService {
                 log.info("[Validate Verification Token] Token is valid.");
                 String email = _emailAuthTokenService.getEmailFromToken(token);
                 UserEntity userEntity = getUserByEmail(email);
+                if (userEntity.getIsVerified())
+                {
+                    log.info("Token is verified!!");
+                    return null;
+                }
                 userEntity.setIsVerified(true);
                 saveUser(userEntity);
                 return true;

@@ -4,13 +4,13 @@ on:
   pull_request:
     branches:
       - main
-#    types:
-#      - closed
+    types:
+      - closed
 
 jobs:
   build_and_test:
     name: Build and upload jar file then create custom AMI
-#    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-24.04
 
     steps:
@@ -50,13 +50,13 @@ jobs:
         run: |
           packer init ./packer/aws.pkr.hcl
 
-#      - name: Build Custom Image
-#        run: |
-#          packer build \
-#            -var "access_key=${{ secrets.AWS_ACCESS_KEY }}" \
-#            -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
-#            -var "aws_region=${{ secrets.AWS_REGION }}" \
-#            -var "ami_user=${{ secrets.AMI_USER }}" ./packer/aws.pkr.hcl
+      - name: Build Custom Image
+        run: |
+          packer build \
+            -var "access_key=${{ secrets.AWS_ACCESS_KEY }}" \
+            -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+            -var "aws_region=${{ secrets.AWS_REGION }}" \
+            -var "ami_user=${{ secrets.AMI_USER }}" ./packer/aws.pkr.hcl
 
       # ------------------ Switch to Demo Account for Deployment ------------------
       - name: Configure AWS Credentials Action for Demo Account
@@ -135,8 +135,7 @@ jobs:
             --auto-scaling-group-name "$ASG_NAME" \
             --preferences '{
               "MinHealthyPercentage": 90,
-              "InstanceWarmup": 300,
-              "Name": "$ASG_NAME"
+              "InstanceWarmup": 300
             }' \
             --query 'InstanceRefreshId' \
             --output text)

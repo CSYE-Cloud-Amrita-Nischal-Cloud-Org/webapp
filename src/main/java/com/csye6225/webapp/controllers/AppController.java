@@ -1,7 +1,10 @@
 package com.csye6225.webapp.controllers;
 
+import com.csye6225.webapp.models.ResponseMessage;
+import com.csye6225.webapp.models.ResponseWrapper;
 import com.csye6225.webapp.services.DbConnection;
 import com.csye6225.webapp.services.UserService;
+import com.csye6225.webapp.utils.JsonUtils;
 import com.timgroup.statsd.StatsDClient;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -57,22 +60,19 @@ public class AppController {
                 .build();
     }
 
-    @GetMapping(path = "/verify")
-    public ResponseEntity<Void> verifyUser(@RequestParam String token) {
+    @GetMapping(path = "/verify", produces = "application/json")
+    public ResponseEntity<String> verifyUser(@RequestParam String token) {
         log.info("[Verify User] -> Initiated . . . ");
         _statsDClient.incrementCounter("endpoint.user.verify");
         long currentTime = System.currentTimeMillis();
         Boolean isTokenValid = _userService.validateVerificationToken(token);
         _statsDClient.recordExecutionTimeToNow("endpoint.user.verify", currentTime);
-        if (isTokenValid == null) {
+        if (BooleanUtils.isNotTrue(isTokenValid)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
-        if (!isTokenValid) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.ok(JsonUtils.toJson(new ResponseWrapper(HttpStatus.OK.value(),
+                ResponseMessage.USER_VERIFIED.getMessage())));
     }
 
     @RequestMapping(value = "/healthz", method = {RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.HEAD, RequestMethod.OPTIONS})
