@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +42,9 @@ public class UserServiceImpl implements UserService {
     private final String BASIC_AUTH = "Basic ";
 
     private AmazonSNSAsync _amazonSNSClient;
+
+    @Value("${aws.sns.topic.name}")
+    String snsTopicName;
 
     @Autowired
     private UserRepository _userRepository;
@@ -187,7 +191,7 @@ public class UserServiceImpl implements UserService {
         String message = JsonUtils.toJson(payload);
         log.info("Sending Message - {} ", message);
 
-        String topicArn = getTopicArn("email_verification");
+        String topicArn = getTopicArn(snsTopicName);
         PublishRequest publishRequest = new PublishRequest(topicArn, message);
         Future<PublishResult> publishResultFuture = _amazonSNSClient.publishAsync(publishRequest);
         String messageId = publishResultFuture.get().getMessageId();
