@@ -34,7 +34,7 @@ Like s3 bucket is already created.
 
 Or Sns topic is present.
 
-`aws --endpoint-url=http://localhost:4566 sns create-topic --name send-email`
+`aws --endpoint-url=http://localhost:4566 sns create-topic --name my-sns-topic`
 
 
 

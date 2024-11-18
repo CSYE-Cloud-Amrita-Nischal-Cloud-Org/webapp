@@ -242,30 +242,6 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @GetMapping(path = "/verify")
-    public ResponseEntity<Void> verifyUser(@RequestParam String token) {
-        log.info("[Verify User] -> Initiated . . . ");
-        _statsDClient.incrementCounter("endpoint.user.verify");
-        long currentTime = System.currentTimeMillis();
-        Boolean isTokenValid = _userService.validateVerificationToken(token);
-        _statsDClient.recordExecutionTimeToNow("endpoint.user.verify", currentTime);
-        if (isTokenValid == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-
-        if (!isTokenValid) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    @RequestMapping(value = "/verify", method = {RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.HEAD, RequestMethod.OPTIONS})
-    public ResponseEntity<Void> methodNotAllowedVerify() {
-        _statsDClient.incrementCounter("endpoint.user.verify.rest");
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
-    }
-
     @RequestMapping(value = "/self", method = {RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.HEAD, RequestMethod.OPTIONS})
     public ResponseEntity<Void> methodNotAllowedSelf() {
         _statsDClient.incrementCounter("endpoint.user.self.api.rest");
