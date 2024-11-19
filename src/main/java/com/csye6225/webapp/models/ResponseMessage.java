@@ -8,7 +8,8 @@ public enum ResponseMessage {
     USER_ALREADY_EXISTS("User already exists!!"),
     INVALID_EMAIL("Email address is invalid!!"),
     USER_VERIFIED("User verification successful!!"),
-    INVALID_PASSWORD("Password must be 8 or more characters");
+    INVALID_PASSWORD("Password must be 8 or more characters"),
+    INVALID_TOKEN("Invalid token");
 
     private final String message;
 
