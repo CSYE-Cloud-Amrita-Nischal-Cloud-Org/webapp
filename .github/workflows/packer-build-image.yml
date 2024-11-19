@@ -37,7 +37,7 @@ jobs:
         run: |
           curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
           sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-          sudo apt-get update && sudo apt-get install -y packer
+          sudo apt-get update && sudo apt-get install -y packer jq
 
       - name: Configure AWS Credentials Action for GitHub Actions
         uses: aws-actions/configure-aws-credentials@v4.0.2
@@ -71,7 +71,6 @@ jobs:
         run: |
           echo "Retrieving latest AMI ID..."
           AMI_ID=$(aws ec2 describe-images \
-            --executable-users self \
             --filters "Name=name,Values=csye6225_f24_app_*" \
                       "Name=state,Values=available" \
             --query "Images | sort_by(@, &CreationDate)[-1].ImageId" \
@@ -87,8 +86,8 @@ jobs:
           LAUNCH_TEMPLATE_NAME=${{ secrets.LAUNCH_TEMPLATE_NAME }}
           LAUNCH_TEMPLATE_ID=$(aws ec2 describe-launch-templates \
             --filters "Name=launch-template-name,Values=$LAUNCH_TEMPLATE_NAME" \
-            --query 'LaunchTemplates[0].LaunchTemplateId' \
-            --output text)
+            --query 'LaunchTemplates[*].{ID:LaunchTemplateId,Name:LaunchTemplateName}' \
+            --output json | jq -r 'sort_by(.Name)[0].ID')
           [ -z "$LAUNCH_TEMPLATE_ID" ] && echo "Error: Launch Template ID not found." && exit 1
           echo "Launch Template ID: $LAUNCH_TEMPLATE_ID"
           echo "LAUNCH_TEMPLATE_ID=$LAUNCH_TEMPLATE_ID" >> $GITHUB_ENV
