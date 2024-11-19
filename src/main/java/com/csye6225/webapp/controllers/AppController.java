@@ -68,7 +68,8 @@ public class AppController {
         Boolean isTokenValid = _userService.validateVerificationToken(token);
         _statsDClient.recordExecutionTimeToNow("endpoint.user.verify", currentTime);
         if (BooleanUtils.isNotTrue(isTokenValid)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.badRequest().body(JsonUtils.toJson(new ResponseWrapper(HttpStatus.BAD_REQUEST.value(),
+                    ResponseMessage.INVALID_TOKEN.getMessage())));
         }
 
         return ResponseEntity.ok(JsonUtils.toJson(new ResponseWrapper(HttpStatus.OK.value(),
