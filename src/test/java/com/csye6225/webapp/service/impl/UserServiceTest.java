@@ -87,7 +87,7 @@ public class UserServiceTest {
 
     @Test
     public void getUserByEmail_Failure() {
-        String email = "test@test.com";
+        String email = "testtest.com";
         UserEntity expectedUser = _userService.getUserByEmail(email);
         doNothing().when(_statsDClient).recordExecutionTimeToNow(any(), anyLong());
         when(_userRepository.findByemail(email)).thenReturn(null);
