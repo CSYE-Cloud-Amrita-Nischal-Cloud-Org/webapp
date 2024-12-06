@@ -94,7 +94,7 @@ public class UserServiceTest {
         assertNull(expectedUser, "User should be null");
     }
 
-//    @Test
+    @Test
     public void createUser_Success() {
         // Actual user
         User user = User.builder()
