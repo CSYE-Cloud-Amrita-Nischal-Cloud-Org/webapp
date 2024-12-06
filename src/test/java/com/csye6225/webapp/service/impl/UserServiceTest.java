@@ -54,7 +54,7 @@ public class UserServiceTest {
 
     @Test
     public void isEmailValid_Failure() {
-        String email = "test@tes";
+        String email = "testtes";
         boolean result = _userService.isEmailValid(email);
         assertFalse(result, "Email is invalid");
     }
@@ -87,7 +87,7 @@ public class UserServiceTest {
 
     @Test
     public void getUserByEmail_Failure() {
-        String email = "testtest.com";
+        String email = "test@test.com";
         UserEntity expectedUser = _userService.getUserByEmail(email);
         doNothing().when(_statsDClient).recordExecutionTimeToNow(any(), anyLong());
         when(_userRepository.findByemail(email)).thenReturn(null);
