@@ -31,7 +31,7 @@ public class AppController {
     @Autowired
     private StatsDClient _statsDClient;
 
-    @GetMapping(path = "/healthz")
+    @GetMapping({"/healthz", "/cicd"})
     public ResponseEntity<Void> healthCheck(HttpServletRequest request) {
         _statsDClient.incrementCounter("endpoint.healthcheck.api.get");
         long currentTime = System.currentTimeMillis();
